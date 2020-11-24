@@ -190,32 +190,3 @@ images, labels = dataiter.next()
 imshow(torchvision.utils.make_grid(images[:4,:,:,:]))
 # print labels
 print(' '.join('%5s' % class_names[labels[j]] for j in range(4)))
-
-class ImageFolderWithPaths(torchvision.datasets.ImageFolder):
-    def __getitem__(self, index):
-        original_tuple = super(ImageFolderWithPaths, self).__getitem__(index)
-        path = self.imgs[index][0]
-        tuple_with_path = (original_tuple + (path,))
-        return tuple_with_path
-
-for 
-test_dataset = ImageFolderWithPaths('/content/train/safely/', val_transforms)
-
-test_dataloader = torch.utils.data.DataLoader(
-    test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
-
-model.eval()
-
-test_predictions = []
-test_img_paths = []
-for inputs, labels, paths in tqdm(test_dataloader):
-    inputs = inputs.to(device)
-    labels = labels.to(device)
-    with torch.set_grad_enabled(False):
-        preds = model(inputs)
-    test_predictions.append(
-        torch.nn.functional.softmax(preds, dim=1)[:,1].data.cpu().numpy())
-    test_img_paths.extend(paths)
-    
-test_predictions = np.concatenate(test_predictions)
-
